@@ -29,3 +29,4 @@ libraryDependencies += "com.nrinaudo" %% "kantan.csv-enumeratum" % "0.6.1"
 libraryDependencies += "com.nrinaudo" %% "kantan.csv-libra" % "0.6.1"
 
 
+
