@@ -28,5 +28,8 @@ libraryDependencies += "com.nrinaudo" %% "kantan.csv-enumeratum" % "0.6.1"
 // Provides instances for libra types.
 libraryDependencies += "com.nrinaudo" %% "kantan.csv-libra" % "0.6.1"
 
-
+//Slick
+libraryDependencies += "com.typesafe.slick" %% "slick" % "3.3.3"
+libraryDependencies += "ch.qos.logback"      % "logback-classic" % "1.2.3"
+libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.23"
 

@@ -1,7 +1,10 @@
 import java.io.File
-
 import kantan.csv._
 import kantan.csv.ops._
+
+import java.nio.charset.Charset
+
+//import java.nio.charset.CodingErrorAction
 //Add for class case use
 import kantan.csv.generic._
 
@@ -9,6 +12,12 @@ import scala.collection.immutable.ListMap
 import scala.io.Codec
 
 implicit val codec:Codec = Codec.ISO8859
+//codec.onMalformedInput(CodingErrorAction.REPLACE)
+//codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
+
+val glpText = new String("Gas liquado de petróleo".getBytes("UTF-8"), "ISO-8859-1")
+println(glpText)
+println("Gas liquado de petr�leo")
 
 case class Matricula(
                       provincia: String,
@@ -85,7 +94,8 @@ motocicletas.foreach(data => printf("%s, %s, %d\n", data._1, data._2, data._3))
 
 //¿Cuáles son las marcas, clases y el servicio que prestan los vehículos que usan Gas liquado de petróleo?
 val dataGLP = values
-  .filter(row => row.combustible.contentEquals("Gas liquado de petróleo"))
+.filter(row => row.combustible.contentEquals("Gas liquado de petróleo"))
+  //.filter(row => row.combustible.equals("Gas liquado de petr�leo"))
   .map(row => (row.marca, row.clase, row.servicio))
   .groupBy(identity)
   .map({ case((marca, clase, servicio), lista) => ((marca, clase, servicio), lista.length)})
@@ -98,8 +108,11 @@ dataGLPSorted.foreach(row => printf("%s, %s, %s, %d\n",
   row._1._3,
   row._2))
 
-new File("/Users/jorgaf/dataglp.csv")
+/*new File("/Users/jorgaf/dataglp.csv")
   .writeCsv[(String, String, String, Int)](
     dataGLPSorted.map(row => (row._1._1, row._1._2, row._1._3, row._2)),
     rfc.withHeader("marca", "clase", "servicio", "cantidad")
   )
+
+ */
+values.map(_.combustible).filter(_.startsWith("Gas l")).map(_.getBytes(Charset.forName("UTF-8")))
