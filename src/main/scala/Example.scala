@@ -35,7 +35,7 @@ object Example extends App {
   val db = Database.forConfig("test01")
 
   // Helper method for running a query in this example file:
-  def exec[T](program:DBIO[T]): T = Await.result(db.run(program), 2.seconds)
+  def exec[T](program: DBIO[T]): T = Await.result(db.run(program), 2.seconds)
 
   // Create the "messages" table:
   println("Creating database table")
@@ -43,7 +43,7 @@ object Example extends App {
 
   // Create and insert the test data:
   println("\nInserting test data")
-  exec(messages++=freshTestData)
+  exec(messages ++= freshTestData)
 
   // Run the test query and print the results:
   println("\nSelecting all messages:")
