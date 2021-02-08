@@ -2,12 +2,11 @@ package joins
 import kantan.csv._
 import kantan.csv.generic._
 import kantan.csv.ops._
-
 import slick.jdbc.MySQLProfile.api._
 
 import java.io.File
 import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{Duration, DurationInt}
 import scala.io.Codec
 
 object JoinProvince extends App {
@@ -23,9 +22,9 @@ object JoinProvince extends App {
   }
   lazy val qryProvince = TableQuery[ProvinceTable]
 
-  case class VehicleRegistation(modelo: String, tonelaje: Double, asientos: Int, provinceId: Long, id: Long=0L)
+  case class VehicleRegistration(modelo: String, tonelaje: Double, asientos: Int, provinceId: Long, id: Long=0L)
 
-  class VehicleRegistrationTable(tag: Tag) extends Table[VehicleRegistation](tag, "VEHICLE_REGISTRATION") {
+  class VehicleRegistrationTable(tag: Tag) extends Table[VehicleRegistration](tag, "VEHICLE_REGISTRATION") {
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def modelo = column[String]("MODELO")
     def tonelaje = column[Double]("TONELAJE")
@@ -34,13 +33,14 @@ object JoinProvince extends App {
 
     def provinceRegistration = foreignKey("fk_province", provinceId, qryProvince)(_.id)
 
-    def * = (modelo, tonelaje, asientos, provinceId, id).mapTo[VehicleRegistation]
+    def * = (modelo, tonelaje, asientos, provinceId, id).mapTo[VehicleRegistration]
 
   }
   lazy val registrationQry = TableQuery[VehicleRegistrationTable]
 
   val db = Database.forConfig("test01")
-  def exec[T](program:DBIO[T]): T = Await.result(db.run(program), 2.seconds)
+  //def exec[T](program:DBIO[T]): T = Await.result(db.run(program), 2.seconds)
+  def exec[T](program:DBIO[T]): T = Await.result(db.run(program), Duration.Inf)
 
   println((qryProvince.schema ++ registrationQry.schema).createStatements.mkString)
   //exec(registrationQry.schema.create)
@@ -67,7 +67,17 @@ object JoinProvince extends App {
   val registration = values.map(row => (row.modelo, row.tonelaje, row.asientos, row.provincia))
   registration.take(20).foreach(println)
 
-  def qryProvinceIdByName(proName: Rep[String]) = for {
+  val provinceList = exec(qryProvince.result)
+  //provinceList.foreach(println)
+  def getProvinceIdByName(provName: String) =
+    provinceList.filter(row => row.name == provName).head.id
+
+  def getSeqToInsert() =
+    registration.map(t => VehicleRegistration(t._1, t._2, t._3, getProvinceIdByName(t._4)))
+
+  exec(registrationQry ++= getSeqToInsert())
+
+  /*def qryProvinceIdByName(proName: Rep[String]) = for {
     province <- qryProvince
     if province.name === proName
   }  yield province
@@ -75,8 +85,9 @@ object JoinProvince extends App {
   println(exec(qryProvinceIdByName("LOJA").result).head.id)
 
   def getSeqToInsert() =
-    registration.take(10).map(t => VehicleRegistation(t._1, t._2, t._3, exec(qryProvinceIdByName(t._4).result).head.id))
+    registration.map(t => VehicleRegistation(t._1, t._2, t._3, exec(qryProvinceIdByName(t._4).result).head.id))
 
-  getSeqToInsert().foreach(println)
+  //getSeqToInsert().foreach(println)
+  exec(registrationQry ++= getSeqToInsert())*/
 
 }
